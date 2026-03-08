@@ -1,0 +1,95 @@
+[
+  {
+    "name": "src",
+    "type": "directory",
+    "mode": 16749,
+    "children": [
+      {
+        "name": ".env",
+        "type": "file",
+        "mode": 33188,
+        "uid": "233db34a2a0dbed3cf86b50f0c8bbd33aa8dab2a"
+      },
+      {
+        "name": ".env.example",
+        "type": "file",
+        "mode": 33188,
+        "uid": "233db34a2a0dbed3cf86b50f0c8bbd33aa8dab2a"
+      },
+      {
+        "name": "README.md",
+        "type": "file",
+        "mode": 33188,
+        "uid": "b23bb4163d48d427b76467edd9772eed8506dc1c"
+      },
+      {
+        "name": "package-lock.json",
+        "type": "file",
+        "mode": 33188,
+        "uid": "9404f81febf24c3e32a33f1dfbbf32c16c6baa20"
+      },
+      {
+        "name": "package.json",
+        "type": "file",
+        "mode": 33188,
+        "uid": "a11fa2c067ea91485482bd70c991623a3019b331"
+      },
+      {
+        "name": "public",
+        "type": "directory",
+        "mode": 16749,
+        "children": [
+          {
+            "name": "app.js",
+            "type": "file",
+            "mode": 33188,
+            "uid": "dccffc4679247b0e84841620e200bd6d54d8be31"
+          },
+          {
+            "name": "index.html",
+            "type": "file",
+            "mode": 33188,
+            "uid": "bf8258780fbc4db30db2bf6783577ac0a4f23b4b"
+          },
+          {
+            "name": "styles.css",
+            "type": "file",
+            "mode": 33188,
+            "uid": "308ce5b3f47642e3cafbbe797094a6a4d01671ff"
+          }
+        ]
+      },
+      {
+        "name": "server.js",
+        "type": "file",
+        "mode": 33188,
+        "uid": "4c4a56b81313589575dbed7a885d28b62ae14dab"
+      },
+      {
+        "name": "tarotDeck.js",
+        "type": "file",
+        "mode": 33188,
+        "uid": "9b011ea6049bcc35258d9b4e0a49075f30395300"
+      },
+      {
+        "name": "vercel.json",
+        "type": "file",
+        "mode": 33188,
+        "uid": "1aa891e09b1ac894d15a416a69a768f83ef541b5"
+      }
+    ]
+  },
+  {
+    "name": "out",
+    "type": "directory",
+    "mode": 16749,
+    "children": [
+      {
+        "name": "server.js",
+        "type": "lambda",
+        "mode": 49590,
+        "uid": "team_tro155wDdg8w7ux2Ly53o5XA-b655d403cb274d50365803cbf64d67fd89"
+      }
+    ]
+  }
+]
