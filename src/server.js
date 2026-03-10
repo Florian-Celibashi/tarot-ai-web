@@ -12,9 +12,10 @@ app.use(express.static(path.join(__dirname, "public")));
 
 const rawApiKey = (process.env.OPENAI_API_KEY || "").trim();
 const apiKey = rawApiKey.startsWith("your_openai_api_key") ? "" : rawApiKey;
-const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+const model = process.env.OPENAI_MODEL || "gpt-5.4";
 const openai = apiKey ? new OpenAI({ apiKey }) : null;
 const riderWaiteBaseUrl = "https://raw.githubusercontent.com/metabismuth/tarot-json/master/cards/";
+const temperature = 1;
 
 const majorArcana = [
   "The Fool",
@@ -65,6 +66,180 @@ const rankNumber = {
   King: 14
 };
 
+const suitElements = {
+  Wands: "Fire",
+  Cups: "Water",
+  Swords: "Air",
+  Pentacles: "Earth"
+};
+
+const suitPlanets = {
+  Wands: "Mars",
+  Cups: "Moon",
+  Swords: "Mercury",
+  Pentacles: "Venus"
+};
+
+const suitZodiacTriplicity = {
+  Wands: "Aries/Leo/Sagittarius",
+  Cups: "Cancer/Scorpio/Pisces",
+  Swords: "Gemini/Libra/Aquarius",
+  Pentacles: "Taurus/Virgo/Capricorn"
+};
+
+const majorArcanaAstrology = {
+  "The Fool": { element: "Air", planet: "Uranus", zodiac: "Aquarius" },
+  "The Magician": { element: "Air", planet: "Mercury", zodiac: "Gemini/Virgo" },
+  "The High Priestess": { element: "Water", planet: "Moon", zodiac: "Cancer" },
+  "The Empress": { element: "Earth", planet: "Venus", zodiac: "Taurus/Libra" },
+  "The Emperor": { element: "Fire", planet: "Mars", zodiac: "Aries" },
+  "The Hierophant": { element: "Earth", planet: "Venus", zodiac: "Taurus" },
+  "The Lovers": { element: "Air", planet: "Mercury", zodiac: "Gemini" },
+  "The Chariot": { element: "Water", planet: "Moon", zodiac: "Cancer" },
+  Strength: { element: "Fire", planet: "Sun", zodiac: "Leo" },
+  "The Hermit": { element: "Earth", planet: "Mercury", zodiac: "Virgo" },
+  "Wheel of Fortune": { element: "Fire", planet: "Jupiter", zodiac: "Sagittarius" },
+  Justice: { element: "Air", planet: "Venus", zodiac: "Libra" },
+  "The Hanged Man": { element: "Water", planet: "Neptune", zodiac: "Pisces" },
+  Death: { element: "Water", planet: "Pluto", zodiac: "Scorpio" },
+  Temperance: { element: "Fire", planet: "Jupiter", zodiac: "Sagittarius" },
+  "The Devil": { element: "Earth", planet: "Saturn", zodiac: "Capricorn" },
+  "The Tower": { element: "Fire", planet: "Mars", zodiac: "Aries" },
+  "The Star": { element: "Air", planet: "Uranus", zodiac: "Aquarius" },
+  "The Moon": { element: "Water", planet: "Neptune", zodiac: "Pisces" },
+  "The Sun": { element: "Fire", planet: "Sun", zodiac: "Leo" },
+  Judgement: { element: "Fire", planet: "Pluto", zodiac: "Scorpio" },
+  "The World": { element: "Earth", planet: "Saturn", zodiac: "Capricorn" }
+};
+
+const minorArcanaDecans = {
+  Wands: {
+    Two: { planet: "Mars", zodiac: "Aries" },
+    Three: { planet: "Sun", zodiac: "Aries" },
+    Four: { planet: "Venus", zodiac: "Aries" },
+    Five: { planet: "Saturn", zodiac: "Leo" },
+    Six: { planet: "Jupiter", zodiac: "Leo" },
+    Seven: { planet: "Mars", zodiac: "Leo" },
+    Eight: { planet: "Mercury", zodiac: "Sagittarius" },
+    Nine: { planet: "Moon", zodiac: "Sagittarius" },
+    Ten: { planet: "Saturn", zodiac: "Sagittarius" }
+  },
+  Cups: {
+    Two: { planet: "Venus", zodiac: "Cancer" },
+    Three: { planet: "Mercury", zodiac: "Cancer" },
+    Four: { planet: "Moon", zodiac: "Cancer" },
+    Five: { planet: "Mars", zodiac: "Scorpio" },
+    Six: { planet: "Sun", zodiac: "Scorpio" },
+    Seven: { planet: "Venus", zodiac: "Scorpio" },
+    Eight: { planet: "Saturn", zodiac: "Pisces" },
+    Nine: { planet: "Jupiter", zodiac: "Pisces" },
+    Ten: { planet: "Mars", zodiac: "Pisces" }
+  },
+  Swords: {
+    Two: { planet: "Moon", zodiac: "Libra" },
+    Three: { planet: "Saturn", zodiac: "Libra" },
+    Four: { planet: "Jupiter", zodiac: "Libra" },
+    Five: { planet: "Venus", zodiac: "Aquarius" },
+    Six: { planet: "Mercury", zodiac: "Aquarius" },
+    Seven: { planet: "Moon", zodiac: "Aquarius" },
+    Eight: { planet: "Jupiter", zodiac: "Gemini" },
+    Nine: { planet: "Mars", zodiac: "Gemini" },
+    Ten: { planet: "Sun", zodiac: "Gemini" }
+  },
+  Pentacles: {
+    Two: { planet: "Jupiter", zodiac: "Capricorn" },
+    Three: { planet: "Mars", zodiac: "Capricorn" },
+    Four: { planet: "Sun", zodiac: "Capricorn" },
+    Five: { planet: "Mercury", zodiac: "Taurus" },
+    Six: { planet: "Moon", zodiac: "Taurus" },
+    Seven: { planet: "Saturn", zodiac: "Taurus" },
+    Eight: { planet: "Sun", zodiac: "Virgo" },
+    Nine: { planet: "Venus", zodiac: "Virgo" },
+    Ten: { planet: "Mercury", zodiac: "Virgo" }
+  }
+};
+
+const courtRankPlanets = {
+  Page: "Earth",
+  Knight: "Mars",
+  Queen: "Moon",
+  King: "Mercury"
+};
+
+function getCardDetails(card) {
+  const majorIndex = majorArcana.indexOf(card);
+  if (majorIndex >= 0) {
+    const majorMeta = majorArcanaAstrology[card] || {};
+    return {
+      arcana: "Major Arcana",
+      number: majorIndex,
+      element: majorMeta.element || "N/A",
+      planet: majorMeta.planet || "N/A",
+      zodiac: majorMeta.zodiac || "N/A",
+      keywords: "N/A"
+    };
+  }
+
+  const minorMatch = card.match(
+    /^(Ace|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|Page|Knight|Queen|King) of (Wands|Cups|Swords|Pentacles)$/
+  );
+  if (!minorMatch) {
+    return {
+      arcana: "Unknown",
+      number: "N/A",
+      element: "N/A",
+      planet: "N/A",
+      zodiac: "N/A",
+      keywords: "N/A"
+    };
+  }
+
+  const rank = minorMatch[1];
+  const suit = minorMatch[2];
+  const numericValue = rankNumber[rank] || "N/A";
+  const decan = minorArcanaDecans[suit]?.[rank];
+
+  return {
+    arcana: "Minor Arcana",
+    number: numericValue,
+    rank,
+    suit,
+    element: suitElements[suit] || "N/A",
+    planet: decan?.planet || courtRankPlanets[rank] || suitPlanets[suit] || "N/A",
+    zodiac: decan?.zodiac || suitZodiacTriplicity[suit] || "N/A",
+    keywords: "N/A"
+  };
+}
+
+function extractTextContent(content) {
+  if (typeof content === "string") {
+    return content.trim();
+  }
+
+  if (!Array.isArray(content)) {
+    return "";
+  }
+
+  return content
+    .map((part) => {
+      if (typeof part === "string") {
+        return part;
+      }
+
+      if (typeof part?.text === "string") {
+        return part.text;
+      }
+
+      if (typeof part?.content === "string") {
+        return part.content;
+      }
+
+      return "";
+    })
+    .join("")
+    .trim();
+}
+
 function drawRandomCard(excludedCards = []) {
   const excludedSet = new Set(excludedCards);
   const availableCards = tarotDeck.filter((card) => !excludedSet.has(card));
@@ -107,7 +282,6 @@ function getTarotImageUrl(card) {
 
 app.post("/api/reading", async (req, res) => {
   const question = (req.body?.question || "").trim();
-  const history = Array.isArray(req.body?.history) ? req.body.history.slice(-8) : [];
   const excludedCards = Array.isArray(req.body?.excludedCards)
     ? [...new Set(req.body.excludedCards.map((card) => String(card).trim()))].filter((card) =>
         tarotDeck.includes(card)
@@ -132,51 +306,37 @@ app.post("/api/reading", async (req, res) => {
   }
 
   const cardImageUrl = getTarotImageUrl(card);
+  const cardDetails = getCardDetails(card);
   const messages = [
     {
       role: "system",
       content:
-        "You are a concise tarot interpreter in an ongoing chat. Keep continuity with previous turns when relevant. Use the newly drawn tarot card for the current answer. Keep it under 180 words."
+        "You are a tarot reader. Interpret the drawn card naturally for the user's question. Keep it balanced in length, usually around 90 to 170 words."
     }
   ];
 
-  for (const turn of history) {
-    const previousQuestion = (turn?.question || "").trim();
-    const previousCard = (turn?.card || "").trim();
-    const previousInterpretation = (turn?.interpretation || "").trim();
-
-    if (previousQuestion) {
-      messages.push({
-        role: "user",
-        content: `Previous user question: ${previousQuestion}`
-      });
-    }
-
-    if (previousCard || previousInterpretation) {
-      messages.push({
-        role: "assistant",
-        content: `Previous drawn card: ${previousCard || "Unknown"}\nPrevious interpretation: ${previousInterpretation || "None"}`
-      });
-    }
-  }
-
   messages.push({
     role: "user",
-    content: `Current user question: ${question}\nNewly drawn tarot card: ${card}\nRespond as the next turn in this same chat.`
+    content: [
+      `Question: ${question}`,
+      `Drawn card: ${card}`
+    ].join("\n\n")
   });
 
   try {
     const completion = await openai.chat.completions.create({
       model,
       messages,
-      temperature: 0.8
+      temperature,
+      reasoning_effort: "medium"
     });
 
-    const interpretation = completion.choices?.[0]?.message?.content?.trim();
+    const interpretation = extractTextContent(completion.choices?.[0]?.message?.content);
     return res.json({
       card,
       cardImageUrl,
-      interpretation: interpretation || "No interpretation returned."
+      cardDetails,
+      interpretation: interpretation || "Please ask again and I will pull a clearer interpretation."
     });
   } catch (error) {
     console.error("OpenAI request failed:", error);

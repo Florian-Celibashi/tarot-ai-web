@@ -4,7 +4,6 @@ const timeline = document.getElementById("timeline");
 const typedText = document.getElementById("typed-text");
 const statusText = document.getElementById("status");
 let isLoading = false;
-const conversationHistory = [];
 const drawnCards = new Set();
 const riderWaiteBaseUrl = "https://raw.githubusercontent.com/metabismuth/tarot-json/master/cards/";
 const majorArcana = [
@@ -86,6 +85,35 @@ function getCardImageUrl(cardName) {
   return `${riderWaiteBaseUrl}${prefix}${String(number).padStart(2, "0")}.jpg`;
 }
 
+function formatCardDetails(details) {
+  if (!details) {
+    return "";
+  }
+
+  const parts = [
+    details.arcana ? `Arcana: ${details.arcana}` : null,
+    details.element ? `Element: ${details.element}` : null,
+    details.planet ? `Planet: ${details.planet}` : null,
+    details.zodiac ? `Zodiac: ${details.zodiac}` : null
+  ].filter(Boolean);
+
+  return parts.join(" | ");
+}
+
+function escapeHtml(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function renderBasicMarkdown(text) {
+  const safe = escapeHtml(text);
+  return safe.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br>");
+}
+
 function scrollToBottom() {
   window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 }
@@ -150,7 +178,6 @@ async function submitQuestion() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         question,
-        history: conversationHistory.slice(-8),
         excludedCards: Array.from(drawnCards)
       })
     });
@@ -161,7 +188,9 @@ async function submitQuestion() {
     }
 
     aiEntry.card.textContent = data.card;
-    aiEntry.text.textContent = data.interpretation;
+    const detailLine = formatCardDetails(data.cardDetails);
+    const fullText = detailLine ? `${detailLine}\n\n${data.interpretation}` : data.interpretation;
+    aiEntry.text.innerHTML = renderBasicMarkdown(fullText);
     const cardImageUrl = data.cardImageUrl || getCardImageUrl(data.card);
     if (cardImageUrl) {
       aiEntry.image.src = cardImageUrl;
@@ -171,11 +200,6 @@ async function submitQuestion() {
       aiEntry.image.remove();
     }
 
-    conversationHistory.push({
-      question,
-      card: data.card,
-      interpretation: data.interpretation
-    });
     drawnCards.add(data.card);
   } catch (error) {
     aiEntry.card.textContent = "Error";

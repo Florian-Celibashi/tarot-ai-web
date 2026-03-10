@@ -6,7 +6,8 @@ A minimal website where a user:
 3. Presses `Enter` to send the question + drawn card to OpenAI.
 4. Sees each turn appended in order (question, then card + AI interpretation), so multiple entries read like a feed.
 5. Sees the classic Rider-Waite tarot card image on the right side of each AI response.
-6. Gets contextual responses that can reference previous turns in the same session.
+6. Gets a short, direct interpretation tied to the exact question.
+7. Sees card metadata (arcana, number, element, planet, zodiac) shown above each interpretation.
 
 ## Run locally
 
@@ -23,5 +24,6 @@ Open: `http://localhost:3000`
 ## Environment variables
 
 - `OPENAI_API_KEY` (required)
-- `OPENAI_MODEL` (optional, default: `gpt-4.1-mini`)
+- `OPENAI_MODEL` (optional, default: `gpt-5.4`)
+- `OPENAI_TEMPERATURE` (optional, default: `1`)
 - `PORT` (optional, default: `3000`)
