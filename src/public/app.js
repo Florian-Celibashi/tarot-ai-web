@@ -5,84 +5,10 @@ const typedText = document.getElementById("typed-text");
 const statusText = document.getElementById("status");
 let isLoading = false;
 const drawnCards = new Set();
-const riderWaiteBaseUrl = "https://raw.githubusercontent.com/metabismuth/tarot-json/master/cards/";
-const majorArcana = [
-  "The Fool",
-  "The Magician",
-  "The High Priestess",
-  "The Empress",
-  "The Emperor",
-  "The Hierophant",
-  "The Lovers",
-  "The Chariot",
-  "Strength",
-  "The Hermit",
-  "Wheel of Fortune",
-  "Justice",
-  "The Hanged Man",
-  "Death",
-  "Temperance",
-  "The Devil",
-  "The Tower",
-  "The Star",
-  "The Moon",
-  "The Sun",
-  "Judgement",
-  "The World"
-];
-const suitPrefix = {
-  Cups: "c",
-  Wands: "w",
-  Swords: "s",
-  Pentacles: "p"
-};
-const rankNumber = {
-  Ace: 1,
-  Two: 2,
-  Three: 3,
-  Four: 4,
-  Five: 5,
-  Six: 6,
-  Seven: 7,
-  Eight: 8,
-  Nine: 9,
-  Ten: 10,
-  Page: 11,
-  Knight: 12,
-  Queen: 13,
-  King: 14
-};
 
 function syncTypedText() {
   typedText.textContent = captureInput.value;
-}
-
-function getCardImageUrl(cardName) {
-  if (!cardName) {
-    return null;
-  }
-
-  const majorIndex = majorArcana.indexOf(cardName);
-  if (majorIndex >= 0) {
-    return `${riderWaiteBaseUrl}m${String(majorIndex).padStart(2, "0")}.jpg`;
-  }
-
-  const minorMatch = cardName.match(
-    /^(Ace|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|Page|Knight|Queen|King) of (Wands|Cups|Swords|Pentacles)$/
-  );
-  if (!minorMatch) {
-    return null;
-  }
-
-  const rank = minorMatch[1];
-  const suit = minorMatch[2];
-  const prefix = suitPrefix[suit];
-  const number = rankNumber[rank];
-  if (!prefix || !number) {
-    return null;
-  }
-
-  return `${riderWaiteBaseUrl}${prefix}${String(number).padStart(2, "0")}.jpg`;
+  screen.classList.toggle("is-composing", Boolean(captureInput.value));
 }
 
 function formatCardDetails(details) {
@@ -93,6 +19,7 @@ function formatCardDetails(details) {
   const parts = [
     details.arcana ? `Arcana: ${details.arcana}` : null,
     details.element ? `Element: ${details.element}` : null,
+    details.courtElement ? `Court element: ${details.courtElement}` : null,
     details.planet ? `Planet: ${details.planet}` : null,
     details.zodiac ? `Zodiac: ${details.zodiac}` : null
   ].filter(Boolean);
@@ -164,7 +91,8 @@ async function submitQuestion() {
   }
 
   isLoading = true;
-  statusText.textContent = "";
+  screen.setAttribute("aria-busy", "true");
+  statusText.textContent = "Drawing a card and interpreting it…";
 
   addUserEntry(question);
   const aiEntry = addAiEntryPlaceholder();
@@ -182,7 +110,7 @@ async function submitQuestion() {
       })
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       throw new Error(data.error || "Request failed.");
     }
@@ -191,7 +119,7 @@ async function submitQuestion() {
     const detailLine = formatCardDetails(data.cardDetails);
     const fullText = detailLine ? `${detailLine}\n\n${data.interpretation}` : data.interpretation;
     aiEntry.text.innerHTML = renderBasicMarkdown(fullText);
-    const cardImageUrl = data.cardImageUrl || getCardImageUrl(data.card);
+    const cardImageUrl = data.cardImageUrl;
     if (cardImageUrl) {
       aiEntry.image.src = cardImageUrl;
       aiEntry.image.alt = `${data.card} tarot card`;
@@ -203,10 +131,12 @@ async function submitQuestion() {
     drawnCards.add(data.card);
   } catch (error) {
     aiEntry.card.textContent = "Error";
-    aiEntry.text.textContent = error.message;
+    aiEntry.text.textContent = error.message || "The reading could not be completed.";
     aiEntry.image.remove();
   } finally {
     isLoading = false;
+    screen.removeAttribute("aria-busy");
+    statusText.textContent = "";
     scrollToBottom();
     captureInput.focus();
   }

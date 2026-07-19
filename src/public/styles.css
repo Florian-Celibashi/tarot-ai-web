@@ -67,6 +67,50 @@ body::after {
   padding: 2.8rem 1.25rem 3rem;
 }
 
+.product-intro {
+  max-width: 58rem;
+  margin-bottom: clamp(2.8rem, 7vw, 6rem);
+  transition: opacity 180ms ease;
+}
+
+.screen.is-composing .product-intro {
+  opacity: 0.42;
+}
+
+.eyebrow {
+  margin: 0 0 0.7rem;
+  color: #d8c99e;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-family: "Marcellus", "Times New Roman", serif;
+  font-size: clamp(2rem, 5.2vw, 4.8rem);
+  font-weight: 400;
+  line-height: 1.06;
+}
+
+.input-help {
+  margin: 1rem 0 0;
+  color: #aaa4b8;
+  font-size: clamp(0.92rem, 1.4vw, 1.08rem);
+  line-height: 1.6;
+}
+
+kbd {
+  border: 1px solid rgba(231, 220, 185, 0.28);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.12rem 0.42rem;
+  color: #f5f1df;
+  font: inherit;
+  font-size: 0.86em;
+}
+
 #capture-input {
   position: fixed;
   left: -9999px;
@@ -124,6 +168,11 @@ body::after {
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
 }
 
+.typed-text:empty::before {
+  content: "Start typing…";
+  color: rgba(242, 240, 246, 0.2);
+}
+
 .ai-card {
   font-size: clamp(1.1rem, 2vw, 1.75rem);
   font-weight: 700;
@@ -174,6 +223,14 @@ body::after {
   font-size: 0.92rem;
   color: #bcb3d4;
   max-width: 58rem;
+  min-height: 1.4rem;
+}
+
+.reflection-note {
+  margin-top: 4rem;
+  color: #777182;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
 }
 
 .hidden {
@@ -181,6 +238,14 @@ body::after {
 }
 
 @media (max-width: 700px) {
+  .screen {
+    padding-top: 1.6rem;
+  }
+
+  .product-intro {
+    margin-bottom: 3rem;
+  }
+
   .ai-entry {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:

@@ -3,15 +3,38 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tarot Terminal</title>
+    <meta
+      name="description"
+      content="A terminal-inspired creative AI experience for reflective, one-card tarot readings."
+    />
+    <title>Tarot AI Terminal</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="screen" id="screen">
-      <textarea id="capture-input" aria-label="Question input"></textarea>
-      <section id="timeline" class="timeline"></section>
-      <div id="typed-text" class="typed-text"></div>
-      <p id="status" class="status"></p>
+      <header class="product-intro">
+        <p class="eyebrow">Tarot AI Terminal</p>
+        <h1>Ask a question. Draw one card.</h1>
+        <p id="input-help" class="input-help">
+          Type anywhere, then press <kbd>Enter</kbd>. Each card appears once before you refresh.
+        </p>
+      </header>
+
+      <textarea
+        id="capture-input"
+        aria-label="Question input"
+        aria-describedby="input-help"
+        autocomplete="off"
+        maxlength="1000"
+        spellcheck="true"
+      ></textarea>
+      <section id="timeline" class="timeline" aria-live="polite"></section>
+      <div id="typed-text" class="typed-text" aria-hidden="true"></div>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <footer class="reflection-note">
+        Designed for reflection and creative exploration—not professional advice.
+      </footer>
     </main>
 
     <script src="app.js"></script>
